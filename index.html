@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conferência de Notas</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Incluindo a biblioteca SheetJS (xlsx.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <h1>App de Conferência de Notas</h1>
+
+    <details class="container-setup">
+        <summary>Configurações</summary>
+        <div class="input-group">
+            <label>Modo de Operação:</label>
+            <input type="radio" id="mode-online" name="operating-mode" value="online">
+            <label for="mode-online">Online</label>
+            <input type="radio" id="mode-offline" name="operating-mode" value="offline" checked>
+            <label for="mode-offline">Offline</label>
+        </div>
+
+        <!-- Online Mode Options -->
+        <div id="online-options">
+            <div class="input-group">
+                <p>A base de produtos será carregada da URL configurada.</p>
+            </div>
+            <div class="input-group">
+                <label for="notes-file">Carregar Arquivo de Notas (.xlsx):</label>
+                <input type="file" id="notes-file" accept=".xlsx">
+            </div>
+        </div>
+
+        <!-- Offline Mode Options -->
+        <div id="offline-options" style="display: none;">
+            <div class="input-group">
+                <p>Os dados serão carregados de <code>/data/produtos.csv</code> e <code>/data/notas.xlsx</code>.</p>
+                <button id="load-offline-data-btn">Carregar Dados Locais</button>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <div class="container-conference">
+        <h2>Conferência</h2>
+        <div id="note-details-display" style="display: none;">
+            <span id="note-info-combined"></span>
+        </div>
+
+        <div class="input-group">
+            <label for="search-note-input">Buscar Nota Fiscal:</label>
+            <input type="text" id="search-note-input" placeholder="Digite o número ou nome..." disabled>
+        </div>
+
+        <div class="input-group">
+            <label for="notes-select">Selecione a Nota Fiscal:</label>
+            <select id="notes-select" disabled>
+                <option>Aguardando dados...</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="barcode-input">Leitura do Código:</label>
+            <input type="text" id="barcode-input" placeholder="Leia o código de barras aqui..." disabled>
+        </div>
+
+        <table id="items-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Referência</th>
+                    <th>EAN13</th>
+                    <th>Produto</th>
+                    <th>Qtd. na Nota</th>
+                    <th>Qtd. Conferida</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Linhas da tabela serão inseridas aqui pelo JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

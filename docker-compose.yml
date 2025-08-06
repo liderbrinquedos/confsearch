@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  conf-app:
+    # Nome da imagem que você construiu. 
+    # Lembre-se que esta imagem precisa existir no servidor de destino.
+    image: conf-app-search:latest
+
+    # Nome do contêiner que será criado.
+    container_name: conf-app-search-container
+
+    # Mapeamento de portas. Mapeia a porta 8081 da máquina host para a porta 80 do contêiner.
+    # Você pode alterar a porta 8081 para qualquer outra porta livre no seu servidor.
+    ports:
+      - "8081:80"
+
+    # Política de reinicialização. 'unless-stopped' reinicia o contêiner automaticamente,
+    # exceto quando ele foi parado manualmente.
+    restart: unless-stopped

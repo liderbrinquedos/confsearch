@@ -1,0 +1,206 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 2rem;
+    background-color: #f4f7f9;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.container-setup, .container-conference {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #555;
+}
+
+input[type="text"], input[type="file"], select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type="radio"] {
+    margin-right: 0.5rem;
+}
+
+button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #1565c0;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0d47a1;
+}
+
+#load-products-btn {
+    margin-top: 0.5rem;
+}
+
+select:disabled, input:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 3rem 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+}
+
+table th, table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #e3f2fd;
+}
+
+.status {
+    font-weight: bold;
+}
+
+.status-pending {
+    background-color: #ffebee; /* Vermelho claro */
+}
+
+.status-pending .status {
+    color: #c62828; /* Vermelho escuro */
+}
+
+.status-partial {
+    background-color: #fff3e0; /* Laranja claro */
+}
+
+.status-partial .status {
+    color: #ef6c00; /* Laranja escuro */
+}
+
+.status-confirmed {
+    background-color: #e8f5e9; /* Verde claro */
+}
+
+.status-confirmed .status {
+    color: #2e7d32; /* Verde escuro */
+}
+
+.btn-undo {
+    background-color: #f44336; /* Vermelho */
+    color: white;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-undo:hover {
+    background-color: #d32f2f;
+}
+
+/* --- Layout para o painel de Configurações --- */
+details.container-setup {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem 2rem 1.5rem 2rem;
+    box-shadow: none;
+}
+
+details.container-setup[open] {
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+details.container-setup summary {
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #333;
+    padding: 0.5rem 0;
+}
+
+code {
+    background-color: #e9ecef;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: "Courier New", Courier, monospace;
+}
+
+/* --- Layout para detalhes da Nota Fiscal --- */
+.note-details-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 1.5rem;
+}
+
+.note-select-group {
+    flex: 1; /* Ocupa metade do espaço disponível */
+    margin-bottom: 0; /* Remove margem inferior padrão do input-group */
+}
+
+.note-info-group {
+    flex: 1; /* Ocupa metade do espaço disponível */
+    background-color: #e3f2fd; /* Cor de fundo para destacar */
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #bbdefb;
+}
+
+.note-info-group p {
+    margin: 0.5rem 0; /* Espaçamento entre as linhas de informação */
+    font-size: 0.95rem;
+}
+
+.note-info-group p:first-child {
+    margin-top: 0;
+}
+
+.note-info-group p:last-child {
+    margin-bottom: 0;
+}
+
+#note-details-display {
+    background-color: #e3f2fd; /* Cor de fundo para destacar */
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #bbdefb;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
