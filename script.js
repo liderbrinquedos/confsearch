@@ -326,6 +326,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         itemInNote.conferido = futureQuantity; // Usa o valor já calculado
         updateTableRow(itemInNote);
+
+        // --- LÓGICA DE FOCO AUTOMÁTICO E DESTAQUE ---
+        const row = itemsTableBody.querySelector(`tr[data-codigo_produto="${itemInNote.codigo_produto}"]`);
+        if (row) {
+            // Rola a linha para o centro da área visível
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Adiciona a classe de destaque e a remove após um tempo
+            row.classList.add('highlight');
+            setTimeout(() => {
+                row.classList.remove('highlight');
+            }, 2000);
+        }
+        // --- FIM DA LÓGICA DE FOCO ---
+
         barcodeInput.value = '';
         barcodeInput.focus();
     }
