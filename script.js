@@ -5,17 +5,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const LOCAL_NOTES_PATH = 'data/notas.xlsx';
 
     // --- SELETORES DO DOM ---
+    const alertContainer = document.getElementById('alert-container');
     const operatingModeRadios = document.querySelectorAll('input[name="operating-mode"]');
     const onlineOptionsDiv = document.getElementById('online-options');
     const offlineOptionsDiv = document.getElementById('offline-options');
     const loadOfflineDataBtn = document.getElementById('load-offline-data-btn');
-    const notesFileInput = document.getElementById('notes-file'); // Online mode notes
+    const notesFileInput = document.getElementById('notes-file');
     const notesSelect = document.getElementById('notes-select');
-    const searchNoteInput = document.getElementById('search-note-input'); // Novo seletor
+    const searchNoteInput = document.getElementById('search-note-input');
     const barcodeInput = document.getElementById('barcode-input');
     const itemsTableBody = document.querySelector('#items-table tbody');
-
-    // New selectors for note details
+    const finalizeNoteBtn = document.getElementById('finalize-note-btn');
     const noteDetailsDisplay = document.getElementById('note-details-display');
     const noteInfoCombinedSpan = document.getElementById('note-info-combined');
 
@@ -30,28 +30,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- OUVINTES DE EVENTOS ---
     operatingModeRadios.forEach(radio => radio.addEventListener('change', handleModeChange));
     loadOfflineDataBtn.addEventListener('click', loadOfflineData);
-    notesFileInput.addEventListener('change', handleNotesFile); // Only for online mode
+    notesFileInput.addEventListener('change', handleNotesFile);
     notesSelect.addEventListener('change', handleNoteSelection);
-    searchNoteInput.addEventListener('input', filterNotes); // Novo ouvinte
+    searchNoteInput.addEventListener('input', filterNotes);
     barcodeInput.addEventListener('keyup', handleBarcodeScan);
     itemsTableBody.addEventListener('click', handleTableClick);
+    finalizeNoteBtn.addEventListener('click', finalizeNote);
 
     // --- FUNÇÕES ---
 
+    function showAlert(message, type = 'info', duration = 5000) {
+        const alertEl = document.createElement('div');
+        alertEl.className = `alert alert-${type} alert-dismissible fade show`;
+        alertEl.role = 'alert';
+        alertEl.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        alertContainer.appendChild(alertEl);
+
+        setTimeout(() => {
+            alertEl.classList.remove('show');
+            setTimeout(() => alertEl.remove(), 150); // Espera a transição de fade out
+        }, duration);
+    }
+
     function initialize() {
-        handleModeChange(); // Set initial view based on the checked radio
+        handleModeChange();
     }
 
     function handleModeChange() {
         const selectedMode = document.querySelector('input[name="operating-mode"]:checked').value;
         resetConferenceState();
-
         if (selectedMode === 'online') {
             onlineOptionsDiv.style.display = 'block';
             offlineOptionsDiv.style.display = 'none';
-            // Automatically load products from URL
             loadProductsFromUrl();
-        } else { // Offline mode
+        } else {
             onlineOptionsDiv.style.display = 'none';
             offlineOptionsDiv.style.display = 'block';
         }
@@ -63,11 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
         currentNoteItems = [];
         notesSelect.innerHTML = '<option>Aguardando dados...</option>';
         notesSelect.disabled = true;
+        searchNoteInput.disabled = true;
+        searchNoteInput.value = '';
         itemsTableBody.innerHTML = '';
         barcodeInput.disabled = true;
         barcodeInput.value = '';
-        noteDetailsDisplay.style.display = 'none'; // Oculta os detalhes da nota
+        noteDetailsDisplay.style.display = 'none';
         noteInfoCombinedSpan.textContent = '';
+        finalizeNoteBtn.style.display = 'none';
     }
 
     function csvToJson(csv) {
@@ -93,23 +111,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const csvData = await response.text();
             productDatabase = csvToJson(csvData);
             console.log("Base de produtos carregada da URL.");
-            alert('Base de produtos online carregada com sucesso!');
+            showAlert('Base de produtos online carregada com sucesso!', 'success');
         } catch (error) {
             console.error('Falha ao carregar produtos da URL:', error);
-            alert('Não foi possível carregar a base de produtos online. Verifique a conexão e a URL.');
+            showAlert('Não foi possível carregar a base de produtos online. Verifique a conexão e a URL.', 'danger');
         }
     }
 
     async function loadOfflineData() {
         try {
-            // 1. Carregar base de produtos local
             const productsResponse = await fetch(LOCAL_PRODUCTS_PATH);
             if (!productsResponse.ok) throw new Error(`Arquivo não encontrado: ${LOCAL_PRODUCTS_PATH}`);
             const productsCsv = await productsResponse.text();
             productDatabase = csvToJson(productsCsv);
             console.log("Base de produtos local carregada.");
 
-            // 2. Carregar notas locais
             const notesResponse = await fetch(LOCAL_NOTES_PATH);
             if (!notesResponse.ok) throw new Error(`Arquivo não encontrado: ${LOCAL_NOTES_PATH}`);
             const notesData = await notesResponse.arrayBuffer();
@@ -121,22 +137,22 @@ document.addEventListener('DOMContentLoaded', () => {
             allNotesData = json.filter(row => row.nota_fiscal && row.codigo_produto);
             console.log('Dados das notas locais carregados.');
 
-            alert('Dados locais carregados com sucesso!');
+            showAlert('Dados locais carregados com sucesso!', 'success');
             populateNotesSelect();
 
         } catch (error) {
             console.error('Erro ao carregar dados locais:', error);
-            alert(`Falha ao carregar dados locais. Verifique se os arquivos 'data/produtos.csv' e 'data/notas.xlsx' existem e estão no formato correto.\n\nDetalhe: ${error.message}`);
+            showAlert(`Falha ao carregar dados locais: ${error.message}`,'danger');
             resetConferenceState();
         }
     }
 
-    function handleNotesFile(event) { // For ONLINE mode
+    function handleNotesFile(event) {
         const file = event.target.files[0];
         if (!file) return;
 
         if (productDatabase.length === 0) {
-            alert('A base de produtos online ainda está sendo carregada ou falhou. Tente novamente em alguns segundos.');
+            showAlert('A base de produtos online ainda está sendo carregada ou falhou. Tente novamente.', 'warning');
             event.target.value = '';
             return;
         }
@@ -153,27 +169,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 allNotesData = json.filter(row => row.nota_fiscal && row.codigo_produto);
                 console.log('Dados das notas (online) carregados.');
                 populateNotesSelect();
-                alert('Arquivo de notas carregado com sucesso!');
+                showAlert('Arquivo de notas carregado com sucesso!', 'success');
             } catch (error) {
                 console.error('Erro ao ler o arquivo .xlsx:', error);
-                alert('Ocorreu um erro ao ler o arquivo de notas. Verifique o formato.');
+                showAlert('Ocorreu um erro ao ler o arquivo de notas. Verifique o formato.', 'danger');
             }
         };
         reader.readAsArrayBuffer(file);
     }
 
     function populateNotesSelect() {
-        // Habilitar o campo de busca, pois agora temos notas para filtrar.
         searchNoteInput.disabled = false;
-        // Limpar o campo de busca para garantir que a lista completa seja exibida inicialmente.
         searchNoteInput.value = '';
-        // Chamar a função de filtro para popular o select com todas as notas.
         filterNotes();
 
         if (allNotesData.length === 0) {
             notesSelect.innerHTML = '<option>Nenhuma nota encontrada</option>';
             notesSelect.disabled = true;
-            searchNoteInput.disabled = true; // Desabilitar se não houver notas
+            searchNoteInput.disabled = true;
             return;
         }
 
@@ -187,14 +200,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const uniqueNoteNumbers = [...new Set(allNotesData.map(item => item.nota_fiscal))].filter(n => n);
 
         const filteredNotes = uniqueNoteNumbers.filter(noteNumber => {
-            // Cria um texto pesquisável para cada nota
             const noteInfo = allNotesData.find(item => item.nota_fiscal === noteNumber);
             const searchableText = `nota fiscal ${noteNumber} ${noteInfo.razao_social_cliente || ''} ${noteInfo.cnpj_cliente || ''}`.toLowerCase();
             return searchableText.includes(searchTerm);
         });
 
         const currentSelectedValue = notesSelect.value;
-        notesSelect.innerHTML = ''; // Limpa as opções atuais
+        notesSelect.innerHTML = '';
 
         if (filteredNotes.length === 0) {
             notesSelect.innerHTML = '<option value="">Nenhuma nota corresponde à busca</option>';
@@ -203,14 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredNotes.forEach(noteNumber => {
                 const option = document.createElement('option');
                 option.value = noteNumber;
-                // Adiciona mais detalhes à opção para melhor identificação
                 const noteInfo = allNotesData.find(item => item.nota_fiscal === noteNumber);
                 option.textContent = `NF ${noteNumber} - ${noteInfo.razao_social_cliente || 'Cliente Desconhecido'}`;
                 notesSelect.appendChild(option);
             });
         }
 
-        // Tenta manter a seleção anterior se ainda estiver na lista filtrada
         if (filteredNotes.includes(parseInt(currentSelectedValue))) {
             notesSelect.value = currentSelectedValue;
         }
@@ -239,17 +249,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleNoteSelection() {
         const selectedNote = notesSelect.value;
+        finalizeNoteBtn.style.display = 'none';
+
         if (!selectedNote) {
             itemsTableBody.innerHTML = '';
             barcodeInput.disabled = true;
-            noteDetailsDisplay.style.display = 'none'; // Esconde os detalhes se nenhuma nota for selecionada
+            noteDetailsDisplay.style.display = 'none';
             return;
         }
 
         const itemsForNote = allNotesData.filter(item => String(item.nota_fiscal) == String(selectedNote));
         currentNoteItems = groupNoteItems(itemsForNote);
         
-        // Encontra os detalhes da nota (pega o primeiro item, já que os detalhes são os mesmos para todos os itens da mesma nota)
         const noteDetails = itemsForNote.length > 0 ? itemsForNote[0] : null;
 
         if (noteDetails) {
@@ -257,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cliente = noteDetails.razao_social_cliente || 'N/A';
             const cnpj = noteDetails.cnpj_cliente || 'N/A';
             noteInfoCombinedSpan.textContent = `EMP: ${empresa} - Cliente: ${cliente} - CNPJ: ${cnpj}`;
-            noteDetailsDisplay.style.display = 'block'; // Exibe os detalhes da nota
+            noteDetailsDisplay.style.display = 'block';
         } else {
             noteDetailsDisplay.style.display = 'none';
         }
@@ -265,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayNoteItems();
         barcodeInput.disabled = false;
         barcodeInput.focus();
+        checkIfNoteIsComplete();
     }
 
     function displayNoteItems() {
@@ -281,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${item.quantidade_total}</td>
                 <td class="conferido-qty">${item.conferido}</td>
                 <td class="status"></td>
-                <td><button class="btn-undo" data-codigo_produto="${item.codigo_produto}">Desfazer</button></td>
+                <td><button class="btn btn-warning btn-sm btn-undo" data-codigo_produto="${item.codigo_produto}"><i class="bi bi-arrow-counterclockwise"></i></button></td>
             `;
             itemsTableBody.appendChild(row);
             updateTableRow(item);
@@ -296,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const productInfo = productDatabase.find(p => String(p.ean13) === barcode || String(p.ean14) === barcode);
 
         if (!productInfo) {
-            alert('Produto não encontrado na base de dados! Verifique o código de barras.');
+            showAlert('Produto não encontrado na base de dados! Verifique o código de barras.', 'danger');
             barcodeInput.value = '';
             return;
         }
@@ -305,44 +317,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const itemInNote = currentNoteItems.find(item => String(item.codigo_produto).trim() === productCodeFromDb);
 
         if (!itemInNote) {
-            alert(`Produto com código ${productCodeFromDb} não foi encontrado na nota fiscal selecionada.`);
+            showAlert(`Produto com código ${productCodeFromDb} não foi encontrado na nota fiscal selecionada.`, 'warning');
             barcodeInput.value = '';
             return;
         }
 
-        // Lógica de contagem automática
         const isBox = String(productInfo.ean14).trim() === barcode && productInfo.multiplo > 1;
         const quantityToAdd = isBox ? parseInt(productInfo.multiplo, 10) : 1;
 
-        // --- NOVA VERIFICAÇÃO ---
         const futureQuantity = itemInNote.conferido + quantityToAdd;
 
         if (futureQuantity > itemInNote.quantidade_total) {
             const remaining = itemInNote.quantidade_total - itemInNote.conferido;
-            alert(`Atenção: Leitura excede a quantidade da nota!\nItem: ${itemInNote.descricao_produto}\nRestam apenas: ${remaining} unidades.`);
+            showAlert(`Atenção: Leitura excede a quantidade da nota! Restam: ${remaining}.`, 'warning');
             barcodeInput.value = '';
             return;
         }
 
-        itemInNote.conferido = futureQuantity; // Usa o valor já calculado
+        itemInNote.conferido = futureQuantity;
         updateTableRow(itemInNote);
 
-        // --- LÓGICA DE FOCO AUTOMÁTICO E DESTAQUE ---
         const row = itemsTableBody.querySelector(`tr[data-codigo_produto="${itemInNote.codigo_produto}"]`);
         if (row) {
-            // Rola a linha para o centro da área visível
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            // Adiciona a classe de destaque e a remove após um tempo
+            row.scrollIntoView({ behavior: 'smooth', block: 'start' });
             row.classList.add('highlight');
-            setTimeout(() => {
-                row.classList.remove('highlight');
-            }, 2000);
+            setTimeout(() => row.classList.remove('highlight'), 2000);
         }
-        // --- FIM DA LÓGICA DE FOCO ---
 
         barcodeInput.value = '';
         barcodeInput.focus();
+        checkIfNoteIsComplete();
     }
 
     function updateTableRow(item) {
@@ -354,16 +358,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         qtyCell.textContent = item.conferido;
         row.classList.remove('status-pending', 'status-partial', 'status-confirmed');
+        statusCell.innerHTML = ''; // Limpa o conteúdo anterior
 
         if (item.conferido >= item.quantidade_total) {
-            statusCell.textContent = 'Conferido';
-            row.classList.add('status-confirmed');
+            row.classList.add('table-success'); // Bootstrap success color
+            statusCell.innerHTML = '<span class="badge bg-success">Conferido</span>';
         } else if (item.conferido > 0) {
-            statusCell.textContent = 'Parcial';
-            row.classList.add('status-partial');
+            row.classList.add('table-warning'); // Bootstrap warning color
+            statusCell.innerHTML = '<span class="badge bg-warning text-dark">Parcial</span>';
         } else {
-            statusCell.textContent = 'Pendente';
-            row.classList.add('status-pending');
+            statusCell.innerHTML = '<span class="badge bg-secondary">Pendente</span>';
         }
     }
 
@@ -378,10 +382,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const itemInNote = currentNoteItems.find(item => String(item.codigo_produto) === productCode);
 
         if (itemInNote && itemInNote.conferido > 0) {
-            itemInNote.conferido -= 1; // Still the simple version
+            itemInNote.conferido -= 1;
             updateTableRow(itemInNote);
+            checkIfNoteIsComplete();
         } else {
-            alert("Não há o que desfazer para este item.");
+            showAlert("Não há o que desfazer para este item.", 'info');
         }
+    }
+
+    function checkIfNoteIsComplete() {
+        if (currentNoteItems.length === 0) {
+            finalizeNoteBtn.style.display = 'none';
+            return;
+        }
+        const isComplete = currentNoteItems.every(item => item.conferido >= item.quantidade_total);
+        if (isComplete) {
+            finalizeNoteBtn.style.display = 'block';
+        } else {
+            finalizeNoteBtn.style.display = 'none';
+        }
+    }
+
+    function finalizeNote() {
+        const noteNumber = notesSelect.value;
+        showAlert(`Nota Fiscal ${noteNumber} finalizada com sucesso!`, 'success');
+        itemsTableBody.innerHTML = '';
+        barcodeInput.disabled = true;
+        barcodeInput.value = '';
+        noteDetailsDisplay.style.display = 'none';
+        finalizeNoteBtn.style.display = 'none';
+        notesSelect.value = ''; 
+        searchNoteInput.focus(); 
     }
 });

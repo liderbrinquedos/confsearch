@@ -2,9 +2,10 @@ version: '3.8'
 
 services:
   conf-app:
-    # Nome da imagem que você construiu. 
-    # Lembre-se que esta imagem precisa existir no servidor de destino.
-    image: conf-app-search:latest
+    # Constrói a imagem a partir do Dockerfile no diretório atual
+    build: .
+    # Opcional: dá um nome para a imagem construída localmente
+    image: conf-app-search-local
 
     # Nome do contêiner que será criado.
     container_name: conf-app-search-container

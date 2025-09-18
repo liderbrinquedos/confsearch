@@ -1,31 +1,48 @@
-/* --- Layout de Painéis para UX Melhorada --- */
+/* --- Layout Geral e Fontes --- */
 html, body {
     height: 100%;
     margin: 0;
     overflow: hidden; /* Impede a rolagem do corpo da página */
+    font-size: 1.1rem; /* Aumenta a fonte base */
 }
 
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Ocupa a altura total da tela */
+    height: 100vh;
 }
 
+/* --- Painel Superior Compacto --- */
 .panel-superior {
-    padding: 0 20px 10px 20px;
-    border-bottom: 2px solid #ccc;
-    background-color: #f9f9f9;
-    flex-shrink: 0; /* Impede que o painel encolha */
+    padding: 0 15px 10px 15px; /* Reduz o padding vertical e horizontal */
+    border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa;
+    flex-shrink: 0;
 }
 
+/* --- Painel Inferior com Rolagem --- */
 .panel-inferior {
-    flex-grow: 1; /* Ocupa todo o espaço restante */
-    overflow-y: auto; /* Habilita a rolagem APENAS neste painel */
-    padding: 10px 20px;
+    flex-grow: 1;
+    overflow: auto; /* Habilita rolagem em ambos os eixos */
+    padding: 10px 5px;
+}
+
+/* Força a tabela a ter uma largura mínima, ativando a rolagem horizontal quando necessário */
+#items-table {
+    min-width: 900px; 
+}
+
+/* Centraliza o conteúdo da tabela e ajusta o botão de ação */
+#items-table td, #items-table th {
+    vertical-align: middle;
+}
+
+.btn-undo {
+    padding: 0.2rem 0.5rem; /* Deixa o botão de ícone menor */
 }
 
 /* --- Destaque para Foco Automático --- */
 .highlight {
-    background-color: #fff3cd; /* Amarelo claro */
+    background-color: #ffc107 !important; /* Usa !important para sobrescrever o estilo do bootstrap */
     transition: background-color 0.5s ease-in-out;
 }

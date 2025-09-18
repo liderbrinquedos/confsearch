@@ -1,11 +1,10 @@
-# Use a imagem oficial do Nginx como base
+# Use uma imagem base oficial do Nginx com Alpine Linux (que é bem leve)
 FROM nginx:alpine
 
-# Copie os arquivos estáticos do seu projeto para o diretório padrão do Nginx
+# Copie os arquivos da aplicação (html, css, js, data) para o diretório padrão do Nginx
 COPY . /usr/share/nginx/html
 
-# Exponha a porta 80 para permitir o acesso ao servidor web
+# Exponha a porta 80 (padrão do Nginx)
 EXPOSE 80
 
-# Comando para iniciar o Nginx quando o contêiner for iniciado
-CMD ["nginx", "-g", "daemon off;"]
+# O comando para iniciar o Nginx já está na imagem base, então não precisamos de um CMD.
